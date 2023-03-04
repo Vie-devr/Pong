@@ -1,20 +1,23 @@
 use macroquad::{
 	prelude::*,
 	math::{ Vec2, Rect },
+	rand::gen_range,
 };
 
+use crate::CANVAS_SIZE;
+
 pub struct Ball {
-	pos: Vec2,
-	dir: Vec2,
-	radius: f32,
+	pub pos: Vec2,
+	pub dir: Vec2,
+	pub radius: f32,
 	speed: f32,
 }
 
 impl Ball {
-	pub fn new(pos: Vec2, dir: Vec2, radius: f32, speed: f32) -> Self {
+	pub fn new(radius: f32, speed: f32) -> Self {
 		Self {
-			pos,
-			dir,
+			pos: CANVAS_SIZE / 2.,
+			dir: Self::get_random_dir(),
 			radius,
 			speed,
 		}
@@ -23,16 +26,10 @@ impl Ball {
 	pub fn update(&mut self) {
 		self.pos += self.dir * self.speed;
 
-		// We are out of bounds by x axis
-		if self.pos.x <= self.radius
-		|| self.pos.x >= crate::CANVAS_SIZE.x - self.radius {
-			self.invert_x_axis();
-		}
-
 		// We are out of bounds by y axis
 		if self.pos.y <= self.radius
-		|| self.pos.y >= crate::CANVAS_SIZE.y - self.radius {
-			self.invert_y_axis();
+		|| self.pos.y >= CANVAS_SIZE.y - self.radius {
+			self.dir.y *= -1.;
 		}
 	}
 
@@ -54,11 +51,17 @@ impl Ball {
 		)
 	}
 
-	pub fn invert_x_axis(&mut self) {
-		self.dir.x *= -1.;
+	pub fn reset(&mut self) {
+		self.pos = CANVAS_SIZE / 2.;
+		self.dir = Self::get_random_dir();
 	}
 
-	pub fn invert_y_axis(&mut self) {
-		self.dir.y *= -1.;
+	fn get_random_dir() -> Vec2 {
+		let factor = if gen_range(0, 2) == 1 {1.} else {-1.};
+
+		Vec2::new(
+			factor,
+			gen_range(0.4, 0.6) * factor,
+		)
 	}
 }
